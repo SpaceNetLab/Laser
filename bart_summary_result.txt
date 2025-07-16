@@ -1,1 +1,0 @@
-LIU et al.: DELAY MINIMIZATION FOR PROGRESSIVE CONSTRUCTION OF SATELLITE CONSTELLATION NETWORK. Satellite-based connectivity has been used to study the latencies hop-by-hop for di￿erent kinds of ISPs in a region. 

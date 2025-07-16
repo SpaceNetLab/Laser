@@ -1,51 +1,36 @@
-import fitz  # The import name for PyMuPDF is fitz
 import os
+from filter import clean_file
+from extractor import *
 
-
-def pdf_to_text_pymupdf(pdf_path):
+def preprocess(input_pdf: str, output_txt: str):
     """
-    Parse the PDF using PyMuPDF and return the extracted text.
-    If the PDF is a scanned document without a text layer, this may return an empty string.
+    Perform the following steps for a single paper:
+      1. Extract text from input_pdf to output_txt
+      2. Clean output_txt (overwrite the file)
     """
-    text = ""
-    with fitz.open(pdf_path) as doc:
-        for page in doc:
-            # get_text("text") parameter defaults to reading the text layer
-            page_text = page.get_text()
-            text += page_text + "\n"
-    return text
+    extract_sections_smart(input_pdf, output_txt)
+    clean_file(output_txt, output_txt)
 
+def main():
+    pdf_root = 'paper_pdf'   # Root directory containing all PDFs
+    txt_root = 'paper_txt'   # Target directory for cleaned TXT output
 
-def batch_pdf_to_txt_pymupdf(pdf_folder, txt_folder):
-    """
-    Batch parse all PDF files in the pdf_folder into text and store them in txt_folder.
-    The output text files will have the same name as the PDF files, with the extension changed to .txt.
-    """
-    if not os.path.exists(txt_folder):
-        os.makedirs(txt_folder)
+    os.makedirs(txt_root, exist_ok=True)
 
-    for filename in os.listdir(pdf_folder):
-        if filename.lower().endswith('.pdf'):
-            pdf_path = os.path.join(pdf_folder, filename)
-
-            try:
-                extracted_text = pdf_to_text_pymupdf(pdf_path)
-            except Exception as e:
-                print(f"Failed to parse: {pdf_path}, Error: {e}")
+    for dirpath, _, filenames in os.walk(pdf_root):
+        for fname in filenames:
+            if not fname.lower().endswith('.pdf'):
                 continue
 
-            base_name = os.path.splitext(filename)[0]
-            txt_filename = base_name + '.txt'
-            txt_path = os.path.join(txt_folder, txt_filename)
+            input_pdf = os.path.join(dirpath, fname)
+            base = os.path.splitext(fname)[0]
+            output_txt = os.path.join(txt_root, f'{base}.txt')
 
-            with open(txt_path, 'w', encoding='utf-8') as f:
-                f.write(extracted_text)
+            try:
+                preprocess(input_pdf, output_txt)
+            except Exception:
+                # Skip the file if an error occurs
+                pass
 
-            print(f"Conversion completed: {pdf_path} -> {txt_path}")
-
-
-if __name__ == "__main__":
-    input_pdf_dir = "./paper_pdf"  # Your PDF folder
-    output_txt_dir = "./paper_txt"  # Directory to store the parsed txt files
-
-    batch_pdf_to_txt_pymupdf(input_pdf_dir, output_txt_dir)
+if __name__ == '__main__':
+    main()

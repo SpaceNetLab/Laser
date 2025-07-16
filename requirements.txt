@@ -1,0 +1,7 @@
+faiss-cpu~=1.11.0.post1
+torch~=2.7.1
+numpy~=2.1.2
+transformers~=4.53.2
+sentence-transformers~=5.0.0
+safetensors~=0.5.3
+huggingface-hub~=0.33.4
