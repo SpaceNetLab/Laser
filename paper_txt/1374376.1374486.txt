@@ -1,0 +1,1373 @@
+Additive Guarantees for Degree Bounded
+Directed Network Design
+Nikhil Bansal
+IBM T. J. Watson Research
+Yorktown Heights, NY, USA
+nikhil@us.ibm.com
+Rohit Khandekar
+IBM T. J. Watson Research
+Yorktown Heights,NY, USA
+rohitk@us.ibm.com
+Viswanath Nagarajan
+∗
+Tepper School of Business
+CMU, Pittsburgh, PA, USA
+viswa@cmu.edu
+ABSTRACT
+We present polynomial-time approximation algorithms for
+some degree-bounded directed network design problems. Our
+main result is for intersecting supermodular connectivity with
+degree bounds: given a directed graph G = (V, E) with non-
+negative edge-costs, a connectivity requirement speciﬁed by
+an intersecting supermodular function f, and upper bounds
+{av, bv}v∈V on in-degrees and out-degrees of vertices, ﬁnd
+a minimum-cost f-connected subgraph of G that satisﬁes
+the degree bounds. We give a bicriteria approximation algo-
+rithm that for any 0 ≤ϵ ≤1
+2, computes an f-connected sub-
+graph with in-degrees at most ⌈av
+1−ϵ⌉+4, out-degrees at most
+⌈bv
+1−ϵ⌉+ 4, and cost at most 1
+ϵ times the optimum. This in-
+cludes, as a special case, the minimum-cost degree-bounded
+arborescence problem. We also obtain similar results for the
+(more general) class of crossing supermodular requirements.
+Our result extends and improves the (3av + 4, 3bv + 4, 3)-
+approximation of Lau et al. [13]. Setting ϵ = 0, our result
+gives the ﬁrst purely additive guarantee for the unweighted
+versions of these problems. Our algorithm is based on round-
+ing an LP relaxation for the problem.
+We also prove that the above cost-degree trade-oﬀ(even
+for the degree-bounded arborescence problem) is optimal rel-
+ative to the natural LP relaxation. For every 0 < ϵ < 1, we
+show an instance where any arborescence with out-degrees
+at most
+bv
+1−ϵ +O(1) has cost at least 1−o(1)
+ϵ
+times the optimal
+LP value.
+For the special case of ﬁnding a minimum degree arbores-
+cence (without costs), we give a stronger +2 additive approx-
+imation. This improves on a result of Lau et al. [13] that
+gives a 2Δ∗+ 2 guarantee, and Klein et al. [11] that gives
+a (1 + ϵ)Δ∗+ O(log1+ϵ n) bound, where Δ∗is the degree
+of the optimal arborescence. As a corollary of our result,
+we (almost) settle a conjecture of Bang-Jensen et al. [1] on
+low-degree arborescences.
+Our algorithms use the iterative rounding technique of
+∗Supported in part by NSF grant CCF-0728841. Work done
+while visiting IBM T.J. Watson Research Center.
+Permission to make digital or hard copies of all or part of this work for
+personal or classroom use is granted without fee provided that copies are
+not made or distributed for proﬁt or commercial advantage and that copies
+bear this notice and the full citation on the ﬁrst page. To copy otherwise, to
+republish, to post on servers or to redistribute to lists, requires prior speciﬁc
+permission and/or a fee.
+STOC’08, May 17–20, 2008, Victoria, British Columbia, Canada.
+Copyright 2008 ACM 978-1-60558-047-0/08/05 ...$5.00.
+Jain [9], which was used by Lau et al. [13] and Singh and
+Lau [19] in the context of degree-bounded network design.
+It is however non-trivial to extend these techniques to the
+directed setting without incurring a multiplicative violation
+in the degree bounds. This is due to the fact that known
+polyhedral characterization of arborescences has the cut-
+constraints which, along with degree-constraints, are unsuit-
+able for arguing the existence of integral variables in a basic
+feasible solution. We overcome this diﬃculty by enhancing
+the iterative rounding steps and by means of stronger count-
+ing arguments. Our counting technique is quite general, and
+it also simpliﬁes the proofs of many previous results.
+We also apply the technique to undirected graphs. We
+consider the minimum crossing spanning tree problem: given
+an undirected edge-weighted graph G, edge-subsets {Ei}k
+i=1,
+and non-negative integers {bi}k
+i=1, ﬁnd a minimum-cost span-
+ning tree (if it exists) in G that contains at most bi edges
+from each set Ei. We obtain a +(r −1) additive approxima-
+tion for this problem, when each edge lies in at most r sets;
+this considerably improves the result of Bil`o et al. [2]. A spe-
+cial case of this problem is degree-bounded minimum span-
+ning tree, and our result gives a substantially easier proof of
+the recent +1 approximation of Singh and Lau [19].
+Categories and Subject Descriptors
+F.2.2 [Theory of Computation]: Analysis of Algorithms
+and Problem Complexity
+General Terms
+Algorithms
+1.
+INTRODUCTION
+The problem of ﬁnding a minimum spanning tree that
+satisﬁes given degree bounds on vertices has received much
+attention in the ﬁeld of combinatorial optimization recently.
+This problem was ﬁrst studied by F¨urer and Raghavachari [6].
+Their motivation was to ﬁnd a broadcast tree in a commu-
+nication network along which the maximum overload of any
+node, proportional to its degree, is minimized. Assuming
+unit edge-costs, they gave a local-search based polynomial-
+time algorithm for computing a spanning tree with maxi-
+mum degree at most Δ∗+1 as long as there exists a spanning
+tree with maximum degree at most Δ∗. This is essentially
+the best possible since computing the optimum is NP-hard.
+Earlier in this decade, a variety of techniques were devel-
+oped in attempts to generalize this result to the case of arbi-
+trary edge-weights. Ravi et al. [18], using a matching-based
+769
+
+augmentation technique, gave a bi-criteria approximation al-
+gorithm that violates both the cost and the degree bounds by
+a multiplicative logarithmic factor. K¨onemann and Ravi [12]
+used a Lagrangian relaxation based method to get O(1) ap-
+proximation on the cost while violating the degrees by a con-
+stant factor plus an additive logarithmic term. Chaudhuri et
+al. [3] based their algorithms on the augmenting-path and
+push-relabel frameworks from the maximum ﬂow problem
+and obtained either logarithmic additive violation or con-
+stant multiplicative violation on degrees. In a recent break-
+through result, Goemans [8] presented an algorithm, based
+on matroid intersection techniques, that computes a span-
+ning tree with cost at most that of the optimum and with
+degrees at most the bounds plus 2. This line of research re-
+cently culminated in the“best possible”plus 1 result of Singh
+and Lau [19]. Their algorithm used an iterative rounding ap-
+proach of Jain [9] while obtaining a spanning tree with cost
+at most that of the optimum while violating the degrees by
+at most an additive +1 term.
+In this paper, we consider directed network design prob-
+lems with either in-degree or out-degree (or both) constraints
+on the vertices. Directed graphs naturally arise in commu-
+nication networks.
+In fact our original motivation was a
+problem that arose at IBM in the context of maximizing
+throughput in peer to peer networks. Here, we are given a
+network where a root node r wishes to transmit packets to all
+the nodes in the network. However, each node has limited
+network resources which determines how many packets it
+can transmit per unit time. It turns out that computing the
+maximum achievable throughput of this network is equiva-
+lent to determining the number of r-arborescences that can
+be packed in the network subject to out-degree bounds.
+As we discuss below, the directed setting turns out to be
+substantially harder than the undirected setting, and much
+fewer results are known in this case.
+First we give some
+relevant deﬁnitions.
+1.1
+Preliminaries
+A family A of subsets of V is intersecting (resp. crossing)
+if S, T ∈A with S ∩T ̸= ∅(resp. S ∩T, V \ (S ∪T) ̸= ∅)
+implies S∩T, S∪T ∈A. A set function f : A →Z+ is called
+intersecting supermodular (resp. crossing supermodular), if
+for any S, T ∈A with S∩T ̸= ∅(resp. S∩T, V \(S∪T) ̸= ∅),
+it holds that f(S ∪T) + f(S ∩T) ≥f(S) + f(T).
+For a directed graph G = (V, E) and a subset S of ver-
+tices, we use δ−
+G(S) (resp. δ+
+G(S)) to denote the set of edges
+entering (resp. leaving) S. When the graph G is clear from
+the context, we drop the subscript G. Consider any non-
+negative real-value assignment x : E →R+ to the edges; we
+use x(δ−(S)) (resp. x(δ+(S))) to denote the total x-value
+of the edges entering (resp. leaving) S.
+Given a directed graph G = (V, E) and an intersecting (or
+crossing) supermodular set function f : A →Z+ for some
+set-family A, a subgraph H = (V, E′) of G is said to be
+f-connected or satisfy requirement f if |δ−
+H(S)| ≥f(S) for
+every S ∈A. In the basic directed network design prob-
+lem [5, 16, 7], given an edge-weighted graph and an inter-
+secting or crossing supermodular set function f, the goal
+is to compute the minimum-cost f-connected subgraph. In
+the degree-bounded variant of network design, there are ad-
+ditional constraints bounding the in-degree and out-degree
+at each vertex. The degree-bounded directed network design
+problem is the following: given a directed graph G = (V, E)
+with edge-costs c : E →R+, an intersecting (or crossing)
+supermodular set function f and integers {av, bv}v∈V , com-
+pute a minimum-cost f-connected subgraph in which each
+vertex v has in-degree at most av and out-degree at most
+bv.
+The intersecting supermodular requirements are gen-
+eral enough to include the problem of packing k-edge dis-
+joint arborescences, and choosing the minimum-cost edges
+to increase the rooted connectivity of a directed graph [5,
+16].
+The crossing supermodular requirements include the
+problem of computing a minimum cost k strongly-connected
+spanning subgraph and several other problems on graphs
+and hypergraphs, a detailed discussion of which can be found
+in [7].
+We shall consider bicriteria approximation algorithms for
+which the output may violate the degree-constraints to some
+extent and its cost is compared to the optimal solution that
+does not violate any constraints. For functions α, β : Z+ →
+Z+ and value ρ ≥1, an algorithm for degree-bounded di-
+rected network design is called an (α, β, ρ) approximation if
+for each instance ⟨G, c, f, {av, bv}v∈V ⟩, the algorithm returns
+an f-connected subgraph H of cost at most ρ times the opti-
+mal f-connected subgraph (that satisﬁes degree-constraints),
+with |δ−
+H(v)| ≤α(av) and |δ+
+H(v)| ≤β(bv) for all v ∈V .
+A family of sets {S1, . . . , Sk} is called laminar if for every
+two sets, either they are disjoint or one is contained in the
+other; i.e., for every 1 ≤i, j ≤k, i ̸= j, either Si ∩Sj = ∅
+or Si ⊂Sj or Sj ⊂Si.
+1.2
+Our results and previous work
+Degree-bounded arborescence problem (no costs).
+Let G = (V, E) be a directed graph with root r, and let bv
+be the bounds on out-degree for each vertex v. The goal in
+the degree bounded arborescence problem is to compute an
+(out-)arborescence from r that satisﬁes the degree bounds
+or declare that it is infeasible. Since in any arborescence,
+every vertex except the root has in-degree exactly one, we
+do not consider bounds on in-degree here. This problem was
+ﬁrst considered by F¨urer and Raghavachari [6] who gave a
+polynomial time algorithm to compute an arborescence that
+violates the degree bound by at most a logarithmic multi-
+plicative factor.
+Klein et al. [11] gave a quasi-polynomial
+time algorithm with degree violation (1 + ϵ)bv + O(log1+ϵ n)
+for any ϵ > 0. Their algorithm starts with a solution and
+successively applies local improvement steps to reduce high
+degrees. Recently, Lau et al. [13], using an iterative round-
+ing technique, obtained a polynomial-time algorithm that
+computes an arborescence with degrees at most 2 · bv + 2.
+We obtain the ﬁrst result with only additive violation in the
+degree bounds. In fact, assuming P ̸= NP, our result is
+almost best possible.
+Theorem 1. There is a polynomial time algorithm that
+given a directed graph with out-degree bounds {bv}v∈V , ei-
+ther constructs an (out-)arborescence such that any vertex v
+has out-degree at most bv + 2 or shows that no arborescence
+satisﬁes the degree bounds exactly.
+In particular, this implies a +2 additive approximation for
+the minimum degree arborescence problem [11]: given a rooted
+directed graph ﬁnd an out-arborescence whose maximal out-
+degree is as small as possible.
+Call a directed graph k-
+arc-strong if every directed cut has at least k edges. Our
+techniques also imply the following result: any k-arc-strong
+graph G contains an arborescence T with δ+
+T (v) ≤⌈
+δ+
+G(v)
+k
+⌉+
+770
+
+2 for all vertices v in G.
+This (almost) settles the fol-
+lowing conjecture, for which the previously best known re-
+sult [1] was an existence of an arborescence T with δ+
+T (v) ≤
+δ+
+G(v)
+2⌊log2 k⌋+ ⌊log2 k⌋.
+Conjecture 1
+(Bang-Jensen et al. [1]). Let G be k-
+arc-strong directed graph. There exists a spanning arbores-
+cence T with δ+
+T (v) ≤
+δ+
+G(v)
+k
++ 1 for all vertices v in G.
+General connectivity requirements with degree bounds.
+We consider the network design problem in directed graphs
+where the connectivity requirement is speciﬁed by an arbi-
+trary intersecting supermodular function [5], and there are
+both in-degree and out-degree bounds {(av, bv)}v∈V on ver-
+tices. The goal here is to ﬁnd a minimum-cost subgraph (if
+it exists) that satisﬁes the connectivity requirement and de-
+gree bounds on vertices. The previously best known results
+for this problem are a (3av + 4, 3bv + 4, 3) approximation
+in general, and a (2av + 2, 2bv + 2, 2) approximation for the
+special case of 0-1 valued functions [13].
+We extend and
+improve this result as follows.
+Theorem 2. For any ϵ ∈[0, 1
+2], there is a polynomial
+time (⌈av
+1−ϵ⌉+ 4, ⌈bv
+1−ϵ⌉+ 4, 1
+ϵ ) approximation algorithm for
+degree bounded network design with intersecting supermodu-
+lar requirement. Here 1
+0 = ∞.
+Note that setting ϵ = 0, gives the ﬁrst additive guarantee
+for the unweighted (no edge-costs) version of the these prob-
+lems. As in Lau et al. [13], our algorithm is based on round-
+ing the fractional solution to a natural linear relaxation of
+the problem (described later); hence the cost guarantee is
+relative to the optimal value of this LP relaxation.
+Surprisingly, it also turns out that the above trade-oﬀbe-
+tween the cost blowup and the degree-bound violation, is
+optimal for the LP relaxation. In fact this integrality gap
+holds even for the basic arborescence problem. The follow-
+ing theorem captures this more formally (the O(1) and o(1)
+terms below are independent of ϵ).
+Theorem 3. For any 0 < ϵ < 1, there is an instance of
+the minimum-cost degree-bounded arborescence problem such
+that, any arborescence with out-degrees at most
+bv
+(1−ϵ) +O(1)
+for all vertices v has cost at least ( 1−o(1)
+ϵ
+) times the optimal
+LP value.
+Note that our dependences on ϵ in Theorems 2 and 3 are
+identical, (i.e. we do not have any hidden constant factors
+in the O or Ω notation), and hence we obtain the optimum
+possible trade-oﬀbetween cost and degree violation (modulo
+some additive terms). Theorem 3 suggests that computing
+low-cost arborescence subject to degree bounds might be an
+inherently harder problem in the directed setting unlike the
+undirected case.
+For degree-bounded network design under the more gen-
+eral crossing supermodular connectivity requirements, Lau
+et al. [13] gave an (3av + 4, 3bv + 4, 3) approximation algo-
+rithm. We show that Theorem 2 can be used to obtain the
+following trade-oﬀin this case.
+Theorem 4. For any ϵ ∈[0, 1
+2], there is a polynomial
+time (⌈av
+1−ϵ⌉+ 4 + fmax, ⌈bv
+1−ϵ⌉+ 4 + fmax, 2
+ϵ ) approximation
+algorithm for degree-bounded network design with crossing
+supermodular requirement f, where fmax = maxS⊆V f(S).
+An interesting corollary of Theorems 2 and 4 is for the
+unweighted case (no edge-costs). Setting ϵ = 0, we obtain
++4 additive approximation in degree for intersecting super-
+modular requirements, and +(fmax +4) additive approxima-
+tion for crossing supermodular requirements. Again, these
+are the ﬁrst purely additive guarantees in the unweighted
+case. For example, this implies a +6 additive approxima-
+tion for the degree-bounded 2-strongly-connected subgraph
+problem.
+Minimum crossing spanning tree problem (MCSP).
+Given an undirected graph G = (V, E), costs ce ≥0 on
+the edges e ∈E, subsets of edges Ei ⊆E for 1 ≤i ≤k,
+and integers bi ≥0 for 1 ≤i ≤k, the MCSP is to ﬁnd a
+minimum-cost spanning tree (if it exists) in G that contains
+at most bi edges from set Ei for 1 ≤i ≤k. We obtain the
+following result for this problem.
+Theorem 5. There is a polynomial-time algorithm that
+for any instance ⟨G, c, {Ei, bi}k
+i=1⟩of the MCSP problem,
+either computes a spanning tree of cost at most the opti-
+mum and with at most bi + r −1 edges from Ei (for all
+1 ≤i ≤k); or shows that the instance is infeasible. Here
+r = maxe∈E |{i | e ∈Ei, 1 ≤i ≤k}|, is the maximum
+number of sets {Ei} that any edge lies in.
+This signiﬁcantly improves on the results of Bil`o et al. [2],
+who consider unweighted instances in which all bi are equal
+to b and ﬁnd a spanning tree containing at most O(b·r log n)
+edges in each set Ei. Theorem 5 has the following special
+cases.
+If the sets Ei are pairwise-disjoint, the MCSP problem can
+be cast as ﬁnding a minimum-cost basis in the graphic ma-
+troid for G that is independent in a partition matroid (where
+an independent set must have at most bi elements from set
+Ei). This problem is an instance of the matroid intersection
+problem which is known to be solvable in polynomial time [4,
+15].
+If on the other hand, Ei denotes the set of edges inci-
+dent to vertex i and bi denotes the degree bound on vertex
+i, the MCSP problem is same as the degree-bounded min-
+imum spanning tree problem. Our algorithm matches the
+best possible +1 bound for this problem obtained by Singh
+and Lau [19]; we note that our proof of Theorem 5 is consid-
+erably simpler than that in [19]. In fact, Theorem 5 readily
+extends to a generalization of MCSP: that of computing a
+minimum-cost basis in a matroid subject to ‘degree bounds’.
+This problem was recently considered by Kir´aly et al. [10]
+who obtained similar guarantees.
+1.3
+Our approach
+Our algorithms are based on the iterative rounding tech-
+nique of Jain [9] which was recently used by Lau et al. [13]
+and Singh and Lau [19] in the context of degree-bounded
+network design problems. The iterative rounding technique,
+which has been extensively used in network design problems,
+proceeds as follows. First the problem is formulated as an
+integer program, and an LP relaxation is obtained. An ex-
+treme point solution, a.k.a. basic feasible solution, to this
+linear program is then computed. The extreme point solu-
+tions are proved to exhibit useful structural properties, for
+example, the existence of an integral variable. Such vari-
+ables are then ﬁxed to their integral values and the resid-
+ual problem is solved iteratively. For example, Singh and
+771
+
+Lau [19] use a clever counting argument to show that in any
+extreme point solution to their LP formulation of degree-
+bounded spanning tree problem, either there is an integral
+edge-variable, or the degree bound constraint of some vertex
+can be dropped without violating it by more than +1 in the
+subsequent steps. The algorithm then either sets such an
+edge to its integral value or drops such a constraint; thereby
+reducing the size of the linear program and repeats.
+Challenges in extension to the directed case. In the
+directed setting, the arborescence polytope (without degree
+bounds) has a linear formulation using the cut-covering con-
+straints; it is not known to have a formulation similar to the
+edge-subset formulation for spanning-trees, which was used
+in [19] for the undirected case.
+One diﬃculty in working
+with the cut formulation is that when used along with degree
+bounds, the cut-constraints may alone contribute 2|V | −1
+tight linearly-independent constraints in a basic solution.
+Using some additional arguments, Lau et al. [13] show that
+either there exists an edge e with xe ≥1
+2 or there is a ver-
+tex v with small degree in the support. Based on this, their
+algorithm iteratively does one of the following: round edge
+e to 1 or drop the degree-constraint of vertex v. Since this
+algorithm rounds
+1
+2-edges to 1, the degree bounds may be
+violated by a multiplicative factor of 2.
+We overcome these diﬃculties by introducing additional
+iterative rounding steps and stronger counting arguments,
+and obtain improved guarantees. We continue to use the
+idea of dropping degree constraints from Lau et al. [13]; so
+at any iteration the degree bounds are present only at a sub-
+set W of the vertices. The degree-bound relaxation step used
+in Lau et al. [13] only considers vertices that have a small
+degree in the support. We extend this step by considering
+all vertices that have small spare (i.e., diﬀerence of support
+degree and fractional degree). We note that such a relax-
+ation step was also used in the +1 algorithm for bounded
+degree MST [19], but not in the directed counterpart [13].
+In addition, we also use some new relaxation steps that in-
+volve treating edges leaving W vertices and non-W vertices
+diﬀerently; this is the basis of the cost/degree trade-oﬀ. Fi-
+nally, as is the case with iterative rounding algorithms, we
+need a careful counting argument to show that a progress
+is possible at every iteration. These arguments [9, 16, 13,
+19] usually involve a token-assignment scheme that ﬁrst dis-
+tributes tokens to variables and then extracts tokens from
+constraints. The novelty in our counting arguments is that
+the token-assignment to each variable depends on the frac-
+tional value of that variable in the basic solution. To the
+best of our knowledge, the earlier proofs based on iterative
+rounding used only integral token-assignment schemes. We
+note that our token-assignment scheme is quite simple and
+lends itself to global counting arguments.
+We believe that our counting technique is fairly general.
+In this paper we have applied them to (both directed and
+undirected) degree bounded network design problems. Sub-
+sequent to this work, Nagarajan et al. [17] employed a similar
+token-assignment scheme for the undirected Steiner network
+problem to obtain a substantially simpler proof of Jain’s 2-
+approximation algorithm [9].
+1.4
+Organization
+The rest of the paper is organized as follows. In Section 2,
+we consider the degree-bounded arborescence problem (un-
+• Set F ←∅and W ←V .
+• If P (E, F, W ) is infeasible, output “infeasible”.
+• Repeat while E \ F ̸= ∅
+1. Compute a basic feasible solution x to P (E, F, W ).
+2. Remove from E all edges e ∈E \ F with xe = 0.
+3. Add to F all edges e ∈E \ F with xe = 1.
+4. For all v ∈W such that there are at most
+bv −|δ+
+F (v)| + 2 edges leaving v in E \ F ,
+(a) Remove v from W .
+(b) Add to F all out-going edges from v in E \ F .
+• Output any (out-)arborescence rooted at r in F .
+Figure 1: Algorithm for degree-bounded arborescence
+weighted) and prove Theorem 1. This result contains the
+basic ideas used in the rest of the paper as well. In Section 3,
+we consider degree-bounded network design under intersect-
+ing supermodular connectivity requirements and prove The-
+orem 2.
+In Section 4, we complement our approximation
+guarantee by showing a tight integrality gap of the natural
+LP relaxation for even the minimum-cost degree-bounded
+arborescence problem (Theorem 3). In Section 5 we con-
+sider the undirected minimum crossing spanning tree prob-
+lem and prove Theorem 5. Due to lack of space, we omit
+the proof of Theorem 4.
+2.
+DEGREE-BOUNDED ARBORESCENCE
+PROBLEM
+In this section, we prove Theorem 1. Our algorithm, given
+in Figure 1, proceeds in several iterations. In a general itera-
+tion of the algorithm, we denote E to be the candidate set of
+edges, initially containing all the edges. The set F ⊆E de-
+notes the edges that we have already picked in our solution
+and the set W ⊆V denotes the vertices on which the out-
+degree bounds constraints are present. Initially, F = ∅and
+W = V . In any iteration, we work with the following linear
+program with variables xe for e ∈E \ F. Let E′ = E \ F.
+For brevity, we use δ−(resp. δ+) to denote δ−
+E′ (resp. δ+
+E′).
+P(E, F, W ) :
+x(δ−(S)) ≥1 −|δ−
+F (S)|
+∀S ⊆V \ {r}
+(cut-constraints)
+x(δ+(v)) ≤bv −|δ+
+F (v)| ∀v ∈W
+(degree-constraints)
+0 ≤xe ≤1
+∀e ∈E′ = E \ F
+In the beginning of the iteration, we compute a basic feasible
+solution x in the polytope P(E, F, W ) using standard linear
+programming techniques. We then update the sets E, F,
+and W as explained in Figure 1. The algorithm, in the end,
+outputs any arborescence contained in the set of edges F.
+The following lemma is easily seen, and we omit the proof.
+Lemma 1. Assume that P(E, F, W ) is feasible at the be-
+ginning of the algorithm.
+If the algorithm terminates, it
+outputs an arborescence T such that |δ+
+T (v)| ≤bv + 2 for
+all v ∈V .
+The rest of the section is devoted to proving that the al-
+gorithm indeed terminates. We show that if |E| and |F| do
+not change in Steps 2 and 3, then |W | must decrease in this
+iteration. Assume that the conditions in Steps 2 and 3 do
+772
+
+not hold, i.e., all e ∈E′ satisfy that 0 < xe < 1. In such a
+case, all the tight constraints in the basic feasible solution
+x come from the cut-constraints and the degree-constraints.
+Moreover, since all edges leaving v are added to F as soon as
+v is removed from W , every edge in E \F must be out-going
+from a W -vertex.1 The following lemma is standard and ob-
+tained by using the fact that the RHS of the cut-constraints
+is a supermodular set function.
+Lemma 2
+([13]). For any basic solution x to P(E, F, W )
+such that 0 < xe < 1 for all e ∈E′, there exists a set T ⊆W
+and a laminar family L of subsets of V such that x is the
+unique solution to the linear system:
+x(δ−(S)) = 1
+∀S ∈L,
+x(δ+(v)) = bv −|δ+
+F (v)|
+∀v ∈T.
+Furthermore, the following two conditions are satisﬁed
+1. The characteristic vectors {χδ−(S) | S ∈L} ∪{χδ+(v) |
+v ∈T} are linearly independent.
+2. The size of the support is equal to |E′| = |T| + |L|.
+For v ∈W , we deﬁne its spare, Sp(v), as the diﬀerence
+between its degree in the support and its fractional degree:
+Sp(v) =
+ e∈δ+(v)
+(1 −xe) = |δ+(v)| −
+ e∈δ+(v)
+xe.
+For v ∈W , let dv = bv−|δ+
+F (v)| be the current degree bound
+on v. Since xe is a feasible LP solution,
+
+e∈δ+(v) xe ≤dv
+and hence Sp(v) ≥|δ+(v)| −dv. Thus Sp(v) is an upper
+bound on the degree violation of vertex v if its degree bound
+is dropped.
+To complete the proof of Theorem 1, we prove the follow-
+ing lemma that shows that if neither Step 2 nor Step 3 in
+the algorithm apply, then Step 4 applies.
+Claim 1. If neither Step 2 nor Step 3 is applicable, then
+there exists v ∈W such that |δ+(v)| −dv ≤2.
+Proof. We ﬁrst argue that it is enough to show that
+|L| <
+ e∈E′
+xe + 2|W |.
+(1)
+Suppose (1) holds. Consider the quantity
+
+v∈W Sp(v). As
+each (u, v) in E′ has its tail u in W , it follows that
+
+v∈W Sp(v) =
+|E′| −
+
+e∈E′ xe. Since Sp(v) ≥δ+(v) −dv, we have
+ v∈W
+(δ+(v) −dv)
+≤
+|E′| −
+ e∈E′
+xe = |L| + |T| −
+ e∈E′
+xe
+(by Lemma 2)
+≤
+|L| + |W | −
+ e∈E′
+xe < 3|W |
+(by inequality (1))
+This in turn implies that there exists v ∈W such that
+|δ+(v)| −dv < 3. Since |δ+(v)| −dv is an integer, it must be
+at most 2.
+The proof of (1) is based on a counting argument, as is
+common in iterative rounding. We assign xe units of “to-
+kens” to each e ∈E′ and two “tokens” to each v ∈W . We
+shall show that these tokens can be redistributed among
+1A vertex in W is henceforth called a W -vertex.
+the sets S ∈L such that each set in L gets at least one
+token, and moreover one token is unused, thereby proving
+that |L| is strictly smaller than the total number of tokens
+
+e∈E′ xe + 2|W |.
+The laminar family L naturally deﬁnes a forest T with
+S ∈L as nodes2. We call a node S ∈L marked if there
+is some vertex w ∈W ∩S; or unmarked otherwise. Recall
+that every edge in E′ leaves a W -vertex; hence if S is an
+unmarked node, no edge of E′ leaves a vertex in S and in
+particular, no edge of E′ is contained in S. From Lemma 2,
+for any set S ∈L, x(δ−(S)) = 1. The assignment of tokens
+to nodes of T is done as follows.
+Leaf nodes in T . Let S ∈L be a leaf in T . Recall that
+x(δ−(S)) = 1. The tokens of edges e ∈δ−(S), which sum
+up to 1, are assigned to S.
+Unmarked non-leaf nodes in T . We in fact show that
+such nodes do not exist in T at all. Let on the contrary,
+S ∈L be such a node, and C1, · · · , Ct ⊂S with t ≥1 be
+its children in T . Since S is unmarked, no edge of E′ lies
+completely inside S, hence δ−(Ci) ⊆δ−(S) for all i, and thus
+t
+i=1 x(δ−(Ci)) ≤x(δ−(S)). As x(δ−(S)) = x(δ−(Ci)) = 1
+for all i, this implies that t = 1 and χδ−(S) = χδ−(C1). But
+this contradicts the linear independence in Lemma 2.
+Marked nodes in T . Let M ⊆T denote the sub-forest
+induced on the marked nodes in T . Call a node S ∈M
+high-degree if S has at least 2 children in M; low-degree if S
+has exactly 1 child in M; all other nodes are leaves in M.
+Since leaves in M correspond to disjoint sets, every such
+node contains at least one distinct W -vertex. We next argue
+that each low-degree node in M also contains a distinct W -
+vertex, distinct also from the W -vertices contained in the
+leaves of M. Let S ∈M be a low-degree node in M, and
+C ∈M be its unique child in M. To establish the above
+property, it is enough to show that W ∩(S\C) ̸= ∅. Suppose
+this is not the case.
+As S \ C does not contain any W -
+vertex, there are no edges from S \ C to C; so δ−(C) ⊆
+δ−(S).
+As x(δ−(C)) = x(δ−(S)) = 1, we get χδ−(S) =
+χδ−(C) contradicting the linear independence.
+Thus we proved that the total number of leaves and low-
+degree vertices in M is at most |W |. Now observe that the
+number of high-degree nodes in M is strictly less than the
+number of leaves in M. Therefore the total number of nodes
+in M is strictly less than 2|W |. Assign each node in M a
+distinct token out of 2|W | tokens from vertices in W leaving
+at least one token unassigned.
+By the token assignment given above, each set in L gets at
+least one token with one token unassigned. Thus the proof
+is complete.
+Our technique implies the following slightly weaker version
+of Conjecture 1 of Bang-Jensen et al. [1].
+Corollary 1. Let G = (V, E) be a k-arc-strong graph,
+i.e., a directed graph in which every directed cut has at least
+k edges. For any r ∈V , there exists an r-rooted arborescence
+T satisfying δ+
+T (v) ≤⌈
+δ+
+G(v)
+k
+⌉+ 2 for every v ∈V .
+Proof. Consider the degree-bounded arborescence prob-
+lem on G with any root r ∈V and degree bounds bv =
+2Throughout, we use node to refer to a vertex in the laminar
+tree, and vertex refers to vertices in G.
+773
+
+⌈δ+
+G(v)/k⌉at each v ∈V . It is clear that x = 1
+k · χE is a fea-
+sible fractional solution to the linear relaxation P(E, ∅, V ) of
+this problem. Thus our algorithm obtains an arborescence
+rooted at r with the desired property.
+3.
+INTERSECTING SUPERMODULAR CON-
+NECTIVITY WITH COSTS
+We now consider degree-bounded network design under
+an intersecting supermodular connectivity requirement, and
+prove Theorem 2.
+The algorithm is again iterative.
+Let
+F ⊆E denote the set of edges that have been ﬁxed to value
+1, A ⊆V the vertices for which there is an in-degree bound,
+and B ⊆V the vertices for which there is an out-degree
+bound at some generic iteration. Consider the following LP
+which we refer to as P(E, F, A, B).
+min
+
+e∈E\F cexe
+s.t.
+x(δ−(S)) ≥f(S) −|δ−
+F (S)|
+∀S ⊆V
+x(δ−(v)) ≤av −(1 −ϵ)|δ−
+F (v)|
+∀v ∈A
+x(δ+(v)) ≤bv −(1 −ϵ)|δ+
+F (v)|
+∀v ∈B
+0 ≤xe ≤1
+∀e ∈E \ F
+(2)
+In such an iteration, the algorithm computes an optimal
+basic feasible solution x. Let E′ = E \ F. The algorithm
+works with a parameter 0 ≤ϵ ≤1/2 and performs one of
+the following steps in each iteration where E′ ̸= ∅:
+1. If there is an edge e ∈E′ with xe = 0, set E ←E\{e}.
+2. If there is an edge e ∈E′ with xe ≥1 −ϵ, set F ←
+F ∪{e}.
+3. If there is an edge e = (u, v) ∈E′ with u /∈B and
+v /∈A and xe ≥ϵ, set F ←F ∪{e}.
+4. If there is v ∈A with strictly less than av −(1 −
+ϵ)|δ−
+F (v)| + 5 edges in E′ entering it, set A ←A \ {v}.
+5. If there is v ∈B with strictly less than bv −(1 −
+ϵ)|δ+
+F (v)| + 5 edges in E′ leaving it, set B ←B \ {v}.
+It is easily veriﬁed that if at least one of these conditions
+holds at each iteration, then the algorithm results in a so-
+lution F satisfying the connectivity requirement, of cost at
+most
+1
+ϵ times the optimal, while having in-degree at most
+⌈av
+1−ϵ⌉+ 4 and out-degree at most ⌈bv
+1−ϵ⌉+ 4 at each vertex
+v ∈V . The rest of this section proves that one of the above
+conditions is true in any iteration. In particular, we show
+that if none of the conditions (1)-(3) are satisﬁed in some
+iteration, then at least one of (4) and (5) must be true. To
+this end, ﬁx an iteration and assume that none of (1)-(3) are
+satisﬁed. As in the previous section, since conditions (1) and
+(2) do not hold, all the tight constraints in a basic feasible
+solution x come from the cut-constraints and the degree-
+constraints. Based on standard uncrossing arguments, we
+have the following.
+Lemma 3
+([13]). For any basic solution x to P(E, F, A, B)
+such that 0 < xe < 1 for all e ∈E′, there exist sets T ′ ⊆A,
+T ′′ ⊆B, and a laminar family L of subsets of V such that
+x is the unique solution to the linear system:
+x(δ−(v)) = av −(1 −ϵ)|δ−
+F (v)|
+∀v ∈T ′
+x(δ+(v)) = bv −(1 −ϵ)|δ+
+F (v)|
+∀v ∈T ′′
+x(δ−(S)) = f(S) −|δ−
+F (S)|
+∀S ∈L
+Furthermore, the following two conditions hold:
+1. For every S ∈L, f(S) −|δ−
+F (S)| ≥1 and is integral.
+2. The characteristic vectors {χδ−(S) | S ∈L}∪{χδ−(v) |
+v ∈T ′} ∪{χδ+(v) | v ∈T ′′} are linearly independent;
+and
+3. The size of the support |E′| = |T ′| + |T ′′| + |L|.
+Let W = A ∪B. We now classify the various types of
+edges in the support E′:
+1. Let E0 be the set of edges (u, v) ∈E′ such that u /∈W
+and v /∈W .
+2. Let E+ be the set of edges (u, v) ∈E′ such that u ∈W
+and v /∈W . Similarly, let E−denote the set of edges
+for which v ∈W but u /∈W .
+3. Let E± be the remaining edges in E′ that have both
+endpoints in W .
+For an edge e, let Sp(e) = 1 −xe. For a set H of edges,
+deﬁne Sp(H) =
+
+e∈H(1 −xe) and Val(H) =
+
+e∈H xe.
+Abusing the notation somewhat, for subsets A, B ⊆V ,
+we also deﬁne Sp(A) =
+
+e=(u,v):v∈A Sp(e) and Sp(B) =
+
+e=(u,v):u∈B Sp(e). Note that Sp(A) ≤Sp(E−) + Sp(E±)
+and Sp(B) ≤Sp(E+) + Sp(E±) and hence,
+Sp(A) + Sp(B) ≤Sp(E+) + Sp(E−) + 2Sp(E±)
+(3)
+Lemma 4. To prove Theorem 2, it suﬃces to show that
+2|L| < 2|E0| + |E+| + Val(E+) + |E−| + Val(E−)
++Val(E±) + 3|W |
+(4)
+Proof. Since |E| = |L| + |T ′| + |T ′′| ≤|L| + |A| + |B|
+and |W | ≤|A| + |B|, the inequality (4) implies that
+2|E| < 2|E0| + |E+| + Val(E+) + |E−| + Val(E−)
++Val(E±) + 5|A| + 5|B|
+(5)
+As |E| = |E0| + |E+| + |E−| + |E±| and Sp(X) = |X| −
+Val(X) ≤|X| for any subset of edges X, the inequalities (5)
+and (3) imply that
+Sp(A)+Sp(B) ≤Sp(E+)+Sp(E−)+2Sp(E±) < 5|A|+5|B|.
+This implies that either there is v ∈A with
+
+e∈δ−(v) Sp(e) <
+5 or there is v ∈B with
+
+e∈δ+(v) Sp(e) < 5. This, in turn,
+implies that either the condition in step (4) holds for some
+v ∈A or the condition in step (5) holds for some v ∈B,
+which proves Theorem 2.
+3.1
+Token assignment: Proof of inequality (4)
+The proof of (4) is done via a “token” assignment scheme.
+We give some tokens to the edges in E′ and vertices in W so
+that the total number of tokens equals the RHS of (4). We
+then reassign these tokens to obtain at least 2 tokens per
+node in L; leaving at least one token unassigned, thereby
+proving (4).
+We give 2 tokens to each edge e = (u, v) ∈E0. Of these,
+1 + xe units “lie” at the head v, and 1 −xe tokens “lie” in
+the “middle” of the edge. We give 1+xe tokens to each edge
+e ∈E+∪E−. For an edge (u, v) ∈E+, the 1+xe tokens lie at
+the head v. For an edge (u, v) ∈E−, the xe tokens lie at the
+head v and 1 token lies in the middle. The remaining edges
+e = (u, v) ∈E± are given xe tokens that lie at the head v.
+We also give 3 tokens to each W -vertex. The tokens lying at
+774
+
+a vertex are initially assigned to the inclusion-wise minimal
+set in L that contains that vertex; while the tokens in the
+middle of an edge are assigned to the inclusion-wise minimal
+set in L that contains both end-points of that edge.
+We call a node S ∈L marked if W ∩S ̸= ∅; or unmarked
+otherwise. Note that for any S ∈L, we have x(δ−(S)) ≥1
+and is an integer. The reassignment of tokens to nodes of L
+proceeds using the following steps.
+3.1.1
+Unmarked leaf nodes
+Let S ∈L be such a node. Since x(δ−(S)) ≥1, there
+are at least two edges of E′ entering S (as each edge has
+xe < 1). Assign the tokens at the heads of these edges to S.
+As S is unmarked, these must be edges of type E0 or E+,
+and S receives at least 2 + x(δ−(S)) ≥3 tokens. One extra
+token of these nodes is going to be reassigned to other nodes
+in L as described later.
+3.1.2
+Unmarked non-leaf nodes
+Let S ∈L be such a node, and C1, · · · , Ct ⊂S its children.
+Let z = x(E′(V \ S, S \ ∪t
+i=1Ci)) denote the total x-value
+entering S \ ∪t
+i=1Ci from outside S.
+We ﬁrst consider the case when z > 0. Note that edges in
+E′(V \ S, S \ ∪t
+i=1Ci) lie either in E0 or E+, thus if z > 0,
+then they contribute at least 1 + z tokens to S. Thus, if
+z ≥1, then S obtains two tokens from them. Now, suppose
+that z < 1. By integrality of the tight cuts, it follows that
+t
+i=1 x(E′(S \ Ci, Ci)) ≥z. Since these are all edges in E0,
+they contribute at least 1 −z middle tokens to S. Thus S
+gets at least (1 + z) + (1 −z) = 2 tokens.
+We now consider the case z = 0. By linear independence
+it follows that
+
+i χδ−(Ci) ̸= χδ−(S). By the integrality of
+connectivity requirements and since z = 0, it follows that
+
+i x(δ−(Ci)) −x(δ−(S)) ≥1 and is an integer. Since each
+edge e ∈∪t
+i=1E′(S\Ci, Ci) satisﬁes xe < ϵ ≤1/2, it is easily
+veriﬁed that the middle tokens of these edges contribute at
+least 2 tokens to S.
+3.1.3
+Marked nodes
+Let M ⊆L denote the laminar family consisting of only
+marked nodes. Call a node S ∈M high-degree if it has at
+least 2 children in M; low-degree if it has exactly 1 child in
+M; and leaf if it has no children in M. We now show how
+to assign tokens to each of these nodes.
+High-degree nodes. Note that the number of high-degree
+nodes in M is strictly less than the number of leaf-nodes
+in M. Arbitrarily assign each high-degree node in M two
+tokens from a distinct W -vertex (in a distinct leaf node of
+M).
+Leaf-nodes. For each leaf node S in M, we assign 1 token
+from some W -vertex contained in it. For the remaining to-
+ken, we argue as follows: If S is also a leaf in L, then S has
+x(δ−(S)) ≥1 and hence S receives at least 1 unit of tokens
+from edges in δ−(S) (since every edge carries at least xe to-
+kens at its head). If S is not a leaf in L, then consider the
+subtree rooted S. This subtree has at least one unmarked
+leaf node. Since each unmarked leaf node has at least 3 to-
+kens assigned to it thus far, S borrows one token arbitrarily
+from one of these nodes. Note that any unmarked leaf node
+can be charged at most once.
+Also note that each W -vertex has been charged at most 3
+tokens so far.
+Low-degree marked nodes. Let S ∈M be such a node,
+and C ∈M be its unique child.
+Suppose that W ∩(S \ C) ̸= ∅, and w ∈W ∩(S \ C) be
+such a vertex. As no node of M is contained in S \ C, S is
+the smallest set in M that contains w. Assign node S two
+tokens from vertex w. Note that this vertex w cannot be
+charged by more than one such set S in this step. Moreover,
+w could not have been used in the earlier charging to W -
+vertices since it is not contained in any leaf node of M.
+Henceforth we assume that W ∩(S \C) = ∅. Let r denote
+the number of unmarked leaves of L contained in S \ C.
+Consider the following cases:
+1. r = 0.
+In this case, there are no unmarked nodes
+in S \ C.
+Let z = x(E′(V \ S, S \ C)) denote the
+total x-value entering S \ C from outside S. We ﬁrst
+consider the case when z = 0. By linear independence
+it follows that χδ−(C) ̸= χδ−(S). By the integrality of
+connectivity requirements and since z = 0, it follows
+that x(δ−(C)) −x(δ−(S)) ≥1 is an integer. Consider
+the edges E′(S \ C, C). They must be either E0 or E−
+edges as S\C does not have a W -vertex. If they are all
+E0 edges, then they must contribute at least 2 tokens
+to S. If at least two of them are E−edges, they also
+contribute at least two tokens to S. If there is exactly
+one E−edge, then it has x-value strictly less than 1−ϵ.
+Since edges in E0 have x-value less than ϵ, we need at
+least two more edges from E0 (and each has at least 1
+2
+middle tokens) to ensure that x(δ−(C)) −x(δ−(S)) ≥
+1. These edges together provide the two tokens for S.
+We now consider the case when z > 0. The edges in
+E′(V \ S, S \ C) are either E0 or E+ edges, so they
+contribute at least 1 + z tokens to S. Thus, if z ≥1,
+then S obtains two tokens from them. Now, suppose
+that z < 1. By integrality of the tight cuts, it follows
+that at least z amount of x-value must also enter C
+from S\C. Since these are either E0 or E−edges, they
+contribute at least 1 −z tokens to S. Thus together S
+has at least (1 + z) + (1 −z) = 2 tokens.
+2. r ≥2. Consider the unmarked leaf nodes in L con-
+tained in S \ C. Note that each of them has been as-
+signed at least 3 tokens thus far (they could not have
+given a token to marked node in previous steps). S is
+assigned 2 tokens by borrowing 1 token each from any
+two unmarked leaf nodes in S \ C.
+3. r = 1. In this case, L∩(S\C) corresponds to a chain of
+k ≥1 unmarked nodes D = {Dk ⊆Dk−1 ⊆· · · ⊆D1}.
+Let D = D1 be the unmarked child of S.
+We ﬁrst
+consider the case that there is an edge e from V \ S to
+S \ (C ∪D). Here, the edge e provides at least 1 token
+to S. For the remaining token, we observe that the
+subtree rooted at D in L has at least one unmarked
+leaf (node Dk). This node still has at least 3 tokens
+since none of its tokens could have been used for earlier
+reassignments. Thus S can borrow 1 token from D and
+get at least 2 tokens.
+Henceforth, we assume that all edges from V \ S enter
+either C or D. Suppose that some unmarked node (say
+Di) in the chain D has a cut value more than 1 (i.e.,
+x(δ−(Di)) = f(Di) −|δ−
+F (Di)| ≥2). In this case, we
+use the following Claim which is proved at the end of
+this section.
+775
+
+Claim 2. Let D = {Dk ⊆Dk−1 ⊆· · · ⊆D1} be
+a chain of unmarked nodes with Dk being a leaf node.
+Then a total of at least 2k + x(δ−(D1)) tokens are as-
+signed to nodes of D.
+Applying Claim 2 to the chain D′ = {Di, · · · , Dk}, we
+obtain that at least 2(k −i+1)+2 tokens are assigned
+to the nodes of D′. Thus there are at least 2 extra
+tokens, which can be reassigned to node S (note that
+these unmarked nodes have not been used in earlier
+reassignments).
+In the remaining, we assume that all nodes in D have
+cut value exactly 1. Let z = x(E′(V \ S, D)) be the
+x-value entering D from V \ S; note that 0 ≤z ≤1
+since D has cut value 1. We consider the following four
+cases.
+Case 1: z = 0. In this case, δ−(S) ⊆δ−(C). From
+linear independence and integrality of the cut values,
+this implies x(E′(S \ C, C)) ≥1. Hence as in step 1,
+S obtains at least 2 middle tokens from E′(S \ C, C)
+(which are type E0 or E−edges).
+Case 2: 0 < z < ϵ. In this case, x(E′(S \ D, D)) =
+1 −z > 1 −ϵ. Since every edge has x-value less than
+1−ϵ, |E′(S \D, D)| ≥2. Also, |E′(V \S, D)| ≥1 since
+z > 0. Thus |δ−(D)| ≥3. We now use the following
+Claim which is again proved at the end of this section.
+Claim 3. Let D = {Dk ⊆Dk−1 ⊆· · · ⊆D1} be
+a chain of unmarked nodes with Dk being a leaf node,
+such that each node Di has cut value x(δ−(Di)) = 1.
+Then a total of at least 2(k −1) + |δ−(D1)| + 1 tokens
+are assigned to nodes of D.
+Now applying Claim 3 to chain D, there are at least
+2k + 2 tokens assigned to the nodes of D. Since there
+are 2 extra tokens, these can be reassigned to S.
+Case 3: ϵ ≤z < 1. From the integrality of the cut
+values of S and C, x(E′(S \C, C)) ≥z ≥ϵ. Since each
+edge in E′(S \C, C) is type E0 or E−, E′(S \C, C) has
+either at least one E−edge or at least two E0 edges
+(each has x-value less than ϵ). In either case S obtains
+at least 1 unit of middle tokens. Borrowing one token
+from the unmarked leaf Dk, S is assigned at least 2
+tokens.
+Case 4: z = 1. Here it must be that x(E′(S \C, C)) ≥
+1: this follows from the linear independence and inte-
+grality of cuts S, C, D and the fact that x(δ−(D)) = 1.
+As in step 1, S has at least 2 units of middle tokens.
+Thus we have shown that (4) holds which implies the result.
+Proof of Claim 2. Note that every edge (u, v) induced on
+D1 is an E0 edge and has 2 tokens: we think of it having one
+token at each of u and v. Every edge (u, v) in δ−(D1) is of
+type E0 or E+ and has 1+x(u,v) tokens at v ∈D1: we think
+of x(u,v) units contributing to the x(δ−(D1)) term and the
+remaining one token lying at v. It now suﬃces to show that
+the total number of end-points of the support E′ inside D1
+is at least 2k. We claim that for every 1 ≤i ≤k, Di \ Di+1
+has at least 2 end-points (setting Dk+1 = ∅). First consider
+Dk: since x(δ−(Dk)) ≥1 there are at least 2 edges entering
+Dk that contribute the 2 (head) end-points. Now consider
+node Di and its child Di+1: let z = x(V \Di, Di \Di+1) and
+consider the following cases.
+1. z = 0. Due to linear independence and integrality of
+Di and Di+1, we have x(Di \ Di+1, Di+1) ≥1, which
+gives at least 2 (tail) end-points.
+2. 0 < z < 1. This immediately gives at least 1 (head)
+end-point. Also we have x(Di \Di+1, Di+1) ≥z (same
+reasons as above) which gives at least 1 (tail) end-
+point.
+3. z ≥1. Here |E′(V \ Di, Di \ Di+1)| ≥2 which gives at
+least 2 (head) end-points.
+In each case, we have at least 2 end-points in Di \ Di+1.
+Thus we have the claim.
+Proof of Claim 3. We ﬁrst show that |E′(Di\Di+1, Di+1)|
+≥1 for all 1 ≤i < k. Consider any node Di (1 ≤i < k)
+and its child Di+1. Since x(δ−(Di)) = x(δ−(Di+1)) = 1,
+using linear independence it follows that there must be an
+edge in E′(Di \Di+1, Di+1). These k −1 edges (all type E0)
+provide 2(k −1) tokens. Together with the tokens on edges
+of δ−(D1) (that total to at least |δ−(D1)|+1 since each such
+edge contributes (1 + xe) tokens), we have the claim.
+4.
+INTEGRALITY GAP INSTANCE
+We now prove Theorem 3. Given an arbitrarily small but
+ﬁxed constant ϵ ∈(0, 1), set δ = ϵ+ϵc where c is a suﬃciently
+large constant independent of ϵ. Consider a directed graph
+G(δ) constructed as follows. See Figure 2 for clarity. Start
+with a complete k-ary outward directed tree T rooted at
+vertex r, with t levels (the solid edges in Figure 2), where
+we set k = 1/δ2c and t = cδ−c−1 ln(2/δ). These tree edges,
+called T-edges, have cost 0. Consider the natural drawing
+of the tree on the plane (as in Figure 2) and label the leaves
+from right to left as 1, . . . , kt. The vertices of T are naturally
+partitioned into levels 0, 1, . . . , t such that the root is at level
+0 and the leaves are at level t. We also label the vertices on
+level i as 1, . . . , ki in the right to left order. For a vertex v,
+let Tv denote the subtree rooted at v and let rv and lv denote
+the smallest and largest indices of leaves in Tv (formally if
+v is the jth node from the right on level i, then lv = jkt−i
+and rv = (j −1)kt−i + 1).
+We add the following additional edges to obtain G(δ). For
+each internal vertex v, we add an edge from the leaf lv to
+v (these are the light dotted edges in Figure 2). All these
+edges also have cost 0. Finally, we add a path from the root,
+visiting the leaves in the order 1, . . . , kt (these are the heavy
+dashed edges) and each of these edges has cost 1.
+Consider the problem of constructing the minimum-cost
+arborescence rooted at r, where each internal vertex has an
+upper bound of b = (1 −δ)k on the out-degree. Consider a
+fractional assignment to the edges where each (solid) edge
+in T has value xe = 1 −δ and every other edge has value
+xe = δ. Observe that each vertex receives 1 unit of ﬂow
+from the root and the fractional out-degree of each internal
+vertex is (1 −δ)k and hence this is a feasible LP solution
+with cost LP ∗= δkt.
+We now show that any integral solution I where the degree
+at each internal vertex is at most b/(1 −ϵ) + O(1) has cost
+at least (1 −o(1))LP ∗/ϵ.
+The crucial observation is the
+following.
+Proposition 1. Suppose a leaf ℓdoes not have a path
+from root to itself in I using only T-edges, then the edge
+(ℓ−1, ℓ) must necessarily lie in I.
+776
+
+r
+2
+3
+kt
+1
+Figure 2: The integrality gap instance with k = 3,
+t = 3. Solid arcs (on complete t-level k-ary tree T)
+have cost 0 and LP-value 1 −δ.
+Dotted arcs have
+cost 0 and LP-value δ. Heavy dashed arcs have cost
+1 and LP-value δ.
+Proof. To see this, consider the unique path from r to ℓ
+in T and let (u, v) be some edge along this path that does not
+lie in I (such an edge must exist since ℓis unreachable from
+r using T-edges). Let L denote the set of leaves {ℓ, . . . , lv},
+and let Sv denote the set of all nodes in Tv from which some
+vertex in L can be reached using T-edges. We claim that
+the (heavy dashed) edge (ℓ−1, ℓ) is only edge in I entering
+the set Sv. Indeed, no T-edge enters Sv since (u, v) /∈I.
+Moreover, no dotted edge enters Sv since such edge must be
+of the form (ℓ′, w) where ℓ′ is a leaf not in Sv and hence
+ℓ′ ∈{rv, . . . , ℓ−1} and w ∈Sv. Now by the construction
+of dotted edges in G(δ), this means that ℓ′ = lw, and hence
+ℓw ∈{rv, . . . , ℓ−1}. But the only leaves reachable by T-
+edges from w have indices at most ℓw which is at most ℓ−1;
+this implies that none of the leaves in L can be reached by
+w which contradicts that w ∈Sv. Thus, (ℓ−1, ℓ) is unique
+edge entering Sv and must necessarily lie in I.
+To ﬁnish the proof, consider the solution I where each
+internal vertex has degree at most b/(1 −ϵ) + O(1) = (1 −
+δ)k/(1 −ϵ) + O(1) = (1 −ϵc/(1 −ϵ))k + O(1) which is at
+most (1−δc+1)k. Thus the total number of leaves that have
+a path from root r using T-edges is at most (1 −δc+1)tkt ≤
+(δ/2)ckt < ϵckt. Thus by the above claim, at least (1−ϵc)kt
+cost 1 edges must lie in I, which implies that the total cost is
+at least (1−ϵc)kt = ((1−ϵc)LP ∗)/δ = (1−ϵc)LP ∗/(ϵ+ϵc) ≥
+(1 −2ϵc−1)LP ∗/ϵ. Since c is arbitrarily large, this implies
+the result.
+From the above example, we see that to achieve a purely
+additive O(1) guarantee for degree using the LP (2), the cost
+has to be violated by a factor at least Ω(
+log n
+log log n), where n
+is the number of vertices in the graph.
+5.
+GENERALIZED MINIMUM CROSSING
+SPANNING TREE PROBLEM
+In this section, we prove Theorem 5. Our algorithm is
+again based on iterative rounding. Consider a general it-
+eration. Let E denote the candidate edges which are not
+yet discarded, let F ⊆E denote the set of edges that we
+have already picked in our solution, and let W ⊆{i | 1 ≤
+i ≤k} denote the crossing constraints that we have not yet
+dropped. In the beginning E is the entire edge-set, F = ∅,
+and W = {i | 1 ≤i ≤k}. In a general iteration, we work
+with the following linear relaxation P(E, F, W ) with vari-
+ables xe for e ∈E′ = E \ F.
+min
+
+e∈E′ ce · xe
+s.t.
+x(E′(V )) = V −1 −|F(V )|
+x(E′(S)) ≤S −1 −|F(S)|
+∀S : 2 ≤|S| ≤|V | −1
+x(E′ ∩Ei) ≤bi −|F ∩Ei|
+∀i ∈W
+0 ≤xe ≤1
+∀e ∈E′ = E −F
+where H(S) (for H ⊆E and S ⊆V ) is the set of edges in H
+with both end-points in S. In this iteration, the algorithm
+computes a basic feasible solution x to P(E, F, W ) and per-
+forms one of the following steps while E′ = E \ F ̸= ∅:
+1. If there is an edge e ∈E′ with xe = 0, set E ←E\{e}.
+2. If there is an edge e ∈E′ with xe = 1, set F ←F ∪{e}.
+3. If for some i ∈W , |E′ ∩Ei| ≤bi −|F ∩Ei| + r −1, i.e.
+|E ∩Ei| ≤bi + r −1, set W ←W \ {i}.
+It is clear that if the algorithm terminates, it terminates
+with a set F containing a spanning tree with cost at most
+the optimum and which contains at most bi + r −1 edges
+from Ei for 1 ≤i ≤k.
+We now argue that in each iteration, one of the above
+steps is always applicable. The following lemma follows by
+uncrossing [8, 19].
+Lemma 5. For any basic solution x to P(E, F, W ) such
+that 0 < xe < 1 for all e ∈E′, there exists a set T ⊆W and
+a laminar family L of subsets of V such that x is the unique
+solution to the linear system:
+x(E′(S)) = |S| −1 −|F(S)|
+∀S ∈L
+x(E′ ∩Ei) = bi −|F ∩Ei|
+∀i ∈T
+Furthermore, the characteristic vectors {χE′(S) | S ∈L} ∪
+{χE′∩Ei | i ∈T} are linearly independent, and the size of
+the support |E′| = |T| + |L|.
+Assume that the conditions in steps (1) and (2) do not
+hold; then we prove that step (3) holds. The key component
+of our proof is the following lemma which is proved by a
+simple counting argument.
+Claim 4. We have |L| ≤x(E′(V )). Moreover the equal-
+ity holds if and only if each edge in E′ is contained in some
+inclusion-wise maximal set S ∈L.
+Proof. Suppose each edge e ∈E′ is given xe tokens.
+These tokens are assigned to the sets S ∈L as follows. An
+edge e is said to belong to S if S is the inclusion-wise minimal
+set in L that contains both the end-points of e. If e belongs
+to S, then xe tokens are assigned to S. We argue that each
+set in the laminar family is assigned a total of unit tokens,
+thereby proving the claim.
+Since xe > 0 for all e ∈E′, each set S ∈L has the RHS
+|S| −1 −|F(S)| at least 1, and hence x(E′(S)) ≥1. This
+gives every leaf set S ∈L at least a total of unit tokens. Now
+consider a non-leaf set S ∈L with t children C1, · · · , Ct ∈L.
+Now χE′(S) =
+t
+j=1 χE′(Cj) +
+{χe | e ∈E′ belongs to S}.
+Since χE′(S) ∪{χE′(Cj)}t
+j=1 is a linearly independent set, we
+have {e | e ∈E′ belongs to S} ̸= ∅. So, the RHS |S| −1 −
+|F(S)| of the constraint for S is at least 1 more than the
+sum of the RHS of constraints of {Cj}t
+j=1. Thus S gets at
+least a total of unit tokens.
+777
+
+Now for i ∈W , deﬁne Sp(i) =
+
+e∈E′∩Ei(1 −xe) = |E′ ∩
+Ei| −x(E′ ∩Ei) and for e ∈E′, deﬁne r(e) = |{i ∈W | e ∈
+E′ ∩Ei}|.
+Lemma 6. We have
+
+i∈W Sp(i) < r|W |.
+Before proving Lemma 6, we argue that it implies that the
+condition in step (3) holds.
+Lemma 6 implies that there
+exists i ∈W such that Sp(i) < r.
+Since x(E′ ∩Ei) ≤
+bi −|F ∩Ei|, we have
+|E′ ∩Ei| = Sp(i) + x(E′ ∩Ei) < r + bi −|F ∩Ei|.
+Since |E′ ∩Ei| and |F ∩Ei| are integers, |E′ ∩Ei| ≤r + bi −
+|F ∩Ei| −1, i.e., the condition in step (3) holds for i.
+Proof of Lemma 6.
+Lemma 5 and Claim 4 imply that
+
+e∈E′(1 −xe) = |E′| −x(E′(V )) = |L| + |T| −x(E′(V )) ≤
+|T| = |W | −|W \ T|. Therefore
+ i∈W
+Sp(i)
+=
+ e∈E′
+r(e)(1 −xe)
+=
+r
+ e∈E′
+(1 −xe) −
+ e∈E′
+(r −r(e))(1 −xe)
+≤
+r|W | −r|W \ T| −
+ e∈E′
+(r −r(e))(1 −xe).
+Moreover, the equality holds if and only if |L| = x(E′(V )).
+Thus if |L| < x(E′(V )) or if r|W \ T| +
+
+e∈E′(r −r(e))(1 −
+xe) > 0, then we obtain that
+
+i∈W Sp(i) < r|W | as de-
+sired.
+Assume on the contrary that this is not the case.
+This combined with the fact that xe < 1 for all e ∈E′,
+we have r(e) = r for all e ∈E′, W = T, and by Claim 4
+(equality condition)
+p
+i=1 χE′(Si) = χE′, where S1, . . . , Sp
+are the inclusion-wise maximal sets in L. Therefore we have
+
+i∈T χE′∩Ei = r · χE′. This implies that r ·
+p
+i=1 χE′(Si) =
+
+i∈T χE′∩Ei, contradicting to the fact that the character-
+istic vectors {χE′(S) | S ∈L} ∪{χE′∩Ei | i ∈T} are linearly
+independent. Thus the proof is complete.
+Generalization to matroids and polymatroids.
+The algorithm above generalizes directly to the problem of
+computing a minimum-cost basis in a matroid (or more gen-
+erally an integer polymatroid) subject to ‘degree bounds’, by
+using the submodularity of the rank function. Details are
+omitted.
+Concluding Remarks and Acknowledgments
+We thank Zhenghua Fu for suggesting us the problem of
+packing arborescences subject to degree bounds, which started
+this project. We also thank Mohit Singh and R. Ravi for
+several useful discussions.
+The techniques developed in this paper can also be used
+to solve connectivity problems on undirected graphs with
+costs. In particular, to obtain O(fmax) additive approxima-
+tion with respect to degree and O(1) multiplicative approx-
+imation with respect to cost for Steiner Network problem.
+We have recently learnt that Lau and Singh [14] have in-
+dependently obtained similar results for this problem, and
+hence we do not present them in this paper. Kir´aly et al. [10]
+have recently obtained results for the matroid generalization
+of the MCSP problem considered in Section 5. They obtain
+an additive +(2r −1) approximation for the case of upper
+and lower bounds on the degrees and +(r−1) approximation
+for upper bounds (or lower bounds) alone.
+6.
+REFERENCES
+[1] Jørgen Bang-Jensen, St´ephan Thomass´e, and Anders
+Yeo. Small degree out-branchings. Journal of Graph
+Theory, 42(4), 2003.
+[2] Vittorio Bil`o, Vineet Goyal, R. Ravi, and Mohit
+Singh. On the crossing spanning tree problem. In
+APPROX-RANDOM, 2004.
+[3] K. Chaudhuri, S. Rao, S. Riesenfeld, and K. Talwar.
+Push relabel and an improved approximation
+algorithm for the bounded degree MST problem. In
+ICALP, 2006.
+[4] J. Edmonds. Matroid Intersection in Discrete
+Optimization I. Annals of Discrete Mathematics,
+4:39–49, 1979.
+[5] Andras Frank. Increasing the rooted-connectivity of a
+digraph by one. Mathematical Programming (B),
+84(3):565–576, 1999.
+[6] M. Furer and B. Raghavachari. Approximating the
+minimum-degree steiner tree to within one of optimal.
+Journal of Algorithms, 17(3):409–423, 1994.
+[7] Harold N. Gabow. On the L∞-Norm of Extreme
+Points for Crossing Supermodular Directed Network
+LPs. In IPCO, 2005.
+[8] Michel X. Goemans. Minimum bounded degree
+spanning trees. In FOCS, 2006.
+[9] Kamal Jain. A factor 2 approximation algorithm for
+the generalized steiner network problem.
+Combinatorica, pages 39–61, 2001.
+[10] Tam´as Kir´aly, Lap Chi Lau, and Mohit Singh. Degree
+bounded matriods and submodular ﬂows. In IPCO,
+2008.
+[11] Philip N. Klein, Radha Krishnan, Balaji
+Raghavachari, and R. Ravi. Approximation algorithms
+for ﬁnding low-degree subgraphs. Networks,
+44(3):203–215, 2004.
+[12] J. Konemann and R. Ravi. A matter of degree:
+Improved approximation algorithms for degree
+bounded minimum spanning trees. SIAM Journal on
+Computing, 31(3):1783–1793, 2002.
+[13] Lap Chi Lau, Joseph (Seﬃ) Naor, Mohammad R.
+Salavatipour, and Mohit Singh. Survivable network
+design with degree or order constraints (Full version).
+In STOC, 2007.
+[14] Lap Chi Lau and Mohit Singh. Additive
+approximation for bounded degree survivable network
+design. In STOC, 2008.
+[15] E.L. Lawler. Matroid intersection algorithms.
+Mathematical Programming, 9:31–56, 1975.
+[16] Vardges Melkonian and ´Eva Tardos. Approximation
+algorithms for a directed network design problem. In
+IPCO, 1999.
+[17] Viswanath Nagarajan, R. Ravi, and Mohit Singh. A
+simple proof of Jain’s 2-approximation algorithm for
+Steiner Network. Manuscript, 2007.
+[18] R. Ravi, M.V. Marathe, S.S. Ravi, D.J. Rosenkrantz,
+and H.B. Hunt III. Many birds with one stone: Multi
+objective approximation algorithms. In STOC, 1993.
+[19] Mohit Singh and Lap Chi Lau. Approximating
+minimum bounded degree spanning trees to within
+one of optimal. In STOC, 2007.
+778
+

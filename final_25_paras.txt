@@ -1,0 +1,85 @@
+【用户问题】
+I want study how Satellite ISL method affect delay.
+
+【两级检索：文档级 Top-5 + 每文档段落 Top-5】
+=== 文档: Delay_Minimization_for_Progressive_Construction_of_Satellite_Constellation_Network.txt (相似度=0.5234) ===
+1) 段落相似度=0.6606
+access to satellites, as the main source of end-to-end delay, can
+
+2) 段落相似度=0.5735
+for studying connectivity over time in the satellite network.
+
+3) 段落相似度=0.5256
+process for the satellite network will serve users with low end-
+
+4) 段落相似度=0.5248
+LIU et al.: DELAY MINIMIZATION FOR PROGRESSIVE CONSTRUCTION OF SATELLITE CONSTELLATION NETWORK
+
+5) 段落相似度=0.5248
+LIU et al.: DELAY MINIMIZATION FOR PROGRESSIVE CONSTRUCTION OF SATELLITE CONSTELLATION NETWORK
+
+=== 文档: net_measure_1.txt (相似度=0.4658) ===
+1) 段落相似度=0.5898
+(LEO) satellites to dramatically reduce communications latency.
+
+2) 段落相似度=0.5023
+Our results indicate that delay and packet loss increase slightly
+
+3) 段落相似度=0.5020
+link and this study, our ping latency measurements are still in
+
+4) 段落相似度=0.4973
+provider that uses geostationary satellites to provide Internet access.
+
+5) 段落相似度=0.4693
+the measured latency and then focus on packet loss and throughput,
+
+=== 文档: 7-A First Look at Starlink Performance.txt (相似度=0.4658) ===
+1) 段落相似度=0.5898
+(LEO) satellites to dramatically reduce communications latency.
+
+2) 段落相似度=0.5023
+Our results indicate that delay and packet loss increase slightly
+
+3) 段落相似度=0.5020
+link and this study, our ping latency measurements are still in
+
+4) 段落相似度=0.4973
+provider that uses geostationary satellites to provide Internet access.
+
+5) 段落相似度=0.4693
+the measured latency and then focus on packet loss and throughput,
+
+=== 文档: net_measure_2.txt (相似度=0.4143) ===
+1) 段落相似度=0.5440
+until Inter-satellite Links (ISLs) become the norm, o￿setting the
+
+2) 段落相似度=0.5359
+additional latency of the satellite link with lower delays in crossing
+
+3) 段落相似度=0.5268
+Performance measurements. Satellite-based connectivity has
+
+4) 段落相似度=0.4912
+study the latencies hop-by-hop for di￿erent kinds of ISPs in a region.
+
+5) 段落相似度=0.4899
+periodically transmitted satellite positions. In Proceedings of the 2019 International
+
+=== 文档: 5-27000.txt (相似度=0.4125) ===
+1) 段落相似度=0.5987
+• The satellites’ ISL range and speed of link setup depend on
+
+2) 段落相似度=0.5787
+because a satellite for which an ISL becomes infeasible may not
+
+3) 段落相似度=0.5605
+Similarly, our accounting for latency uses only propagation delay,
+
+4) 段落相似度=0.5563
+which satellite-satellite connections to build to minimize latency
+
+5) 段落相似度=0.5294
+deployments to already use ISLs, and given that satellites will be
+
+【END】
