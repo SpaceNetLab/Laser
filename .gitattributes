@@ -7,3 +7,5 @@
 *.bin filter=lfs diff=lfs merge=lfs -text
 *.h5 filter=lfs diff=lfs merge=lfs -text
 *.msgpack filter=lfs diff=lfs merge=lfs -text
+.idea
+__pycache__
