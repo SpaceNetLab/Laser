@@ -4,6 +4,19 @@ This repository implements Laser, a Large Language Model (LLM)-assisted semi-aut
 
 
 
+BibTeX citation:
+```bibtex
+@inproceedings{10.1145/3748749.3749084,
+author = {Wang, Yibo and Hou, Yunan and Lai, Zeqi and Li, Hewu and Wu, Qian and Liu, Jun and Li, Yuanjie and Xie, Xin and Han, Zhifeng},
+title = {How LLM Saved Me from Struggling with Experiment Reproduction: LEO Networking as A Case Study},
+year = {2025},
+booktitle = {Proceedings of the 2025 3rd Workshop on LEO Networking and Communication}
+}
+```
+
+
+
+
 ## Environment and Dependencies
 
 ### 1. Python is needed
@@ -35,15 +48,26 @@ You can use any LLM that supports code generation, such as OpenAI's ChatGPT or o
 ### Preliminaries for Experiment Reproduction
 
 Step 1: Run `preprocessor.py` to collect, filter and map the online research papers or the papers under `paper_pdf` folder. The output will be stored in `paper_txt` folder.
+```shell
+git clone git@github.com:SpaceNetLab/Laser.git
+cd Laser
+python preprocessor.py
+```
+
 
 Step 2: Write your experiment requirement file in `requirement.txt`. This file should contain the specific requirements for the experiment you want to reproduce, such as "Reproduce the experiment presented in this LEO networking paper."
 
 Step 3: Laser stores the embeddings map and experiment requirements in a two-level vector database.
 So, run `L1_database.py` for building coarse-grained database and `L2_database.py` for building fine-grained database. The output will be stored in `coarse_index.faiss` and `fine_index.faiss`.
-
+```shell
+python L1_database.py
+python L2_database.py
+```
 
 Step 4: Run `search.py` to map the experiment requirement and match relevant information. `search.py` will search in `coarse_index.faiss` and `fine_index.faiss` to find the relevant information. The output will be stored in `results.txt`.
-
+```shell
+python search.py
+```
 
 ### Experiment Reproduction
 
