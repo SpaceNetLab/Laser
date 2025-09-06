@@ -6,7 +6,7 @@ This repository implements Laser, a Large Language Model (LLM)-assisted semi-aut
 
 BibTeX citation:
 ```bibtex
-@inproceedings{10.1145/3748749.3749084,
+@inproceedings{Laser,
 author = {Wang, Yibo and Hou, Yunan and Lai, Zeqi and Li, Hewu and Wu, Qian and Liu, Jun and Li, Yuanjie and Xie, Xin and Han, Zhifeng},
 title = {How LLM Saved Me from Struggling with Experiment Reproduction: LEO Networking as A Case Study},
 year = {2025},
